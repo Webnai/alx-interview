@@ -1,51 +1,35 @@
+#!/usr/bin/python3
+"""check stdin"""
+
+
 import sys
 
-# Initialize variables to store metrics
-total_file_size = 0
-status_code_counts = {
-    200: 0,
-    301: 0,
-    400: 0,
-    401: 0,
-    403: 0,
-    404: 0,
-    405: 0,
-    500: 0
-}
 
-line_count = 0
-
+total_size = 0
+status = ['200', '301', '400', '401', '403', '404', '405', '500']
+times_status = [0, 0, 0, 0, 0, 0, 0, 0]
+counter = 0
 try:
     for line in sys.stdin:
-        # Split the line into its components
-        parts = line.split()
-
-        if len(parts) != 7:
-            continue  # Skip lines that don't match the input format
-
-        # Extract status code and file size
-        status_code = int(parts[5])
-        file_size = int(parts[6])
-
-        # Update metrics
-        total_file_size += file_size
-        status_code_counts[status_code] += 1
-
-        line_count += 1
-
-        # Check if it's time to print statistics
-        if line_count % 10 == 0:
-            print(f"File size: {total_file_size}")
-            for code, count in sorted(status_code_counts.items()):
-                if count > 0:
-                    print(f"{code}: {count}")
-
-except KeyboardInterrupt:
+        line_list = line.split(" ")
+        if len(line_list) > 2:
+            size = line_list[-1]
+            code = line_list[-2]
+            if code in status:
+                i = status.index(code)
+                times_status[i] += 1
+            total_size += int(size)
+            counter += 1
+        if counter == 10:
+            print("File size: {:d}".format(total_size))
+            for i in range(8):
+                if times_status[i] != 0:
+                    print("{:}: {:d}".format(status[i], times_status[i]))
+            counter = 0
+except Exception:
     pass
-
-# Print final statistics
-print(f"File size: {total_file_size}")
-for code, count in sorted(status_code_counts.items()):
-    if count > 0:
-        print(f"{code}: {count}")
-
+finally:
+    print("File size: {:d}".format(total_size))
+    for i in range(8):
+        if times_status[i] != 0:
+            print("{:}: {:d}".format(status[i], times_status[i]))
